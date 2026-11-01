@@ -11,13 +11,13 @@
 
   <name>pintabien-common-lib</name>
   <description>Contratos de eventos, enums compartidos y utilidades pequenas de Pintabien.app (SemVer)</description>
-  <url>https://github.com/${github.owner}/pintabien-common-lib</url>
+  <url>https://github.com/Jeliases/pintabien-common-lib</url>
 
   <properties>
     <maven.compiler.release>21</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <github.owner>pintabien</github.owner>
+    <github.owner>Jeliases</github.owner>
     <jackson.version>2.19.2</jackson.version>
     <junit.version>5.12.2</junit.version>
     <assertj.version>3.27.3</assertj.version>

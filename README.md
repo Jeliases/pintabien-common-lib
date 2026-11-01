@@ -51,7 +51,7 @@ Los consumidores **deben ser idempotentes** (descartar `eventId` repetidos).
 
 - **Desarrollo local:** `./mvnw install` en este repo deja el artefacto en `~/.m2`.
 - **CI / producción:** el artefacto se publica en GitHub Packages al crear un tag `vX.Y.Z`. Los consumidores
-  declaran el repositorio `https://maven.pkg.github.com/<owner>/pintabien-common-lib` y autentican con
+  declaran el repositorio `https://maven.pkg.github.com/Jeliases/pintabien-common-lib` y autentican con
   `GITHUB_ACTOR`/`GITHUB_TOKEN` (scope `read:packages`) en `~/.m2/settings.xml`.
 
 ## Build
