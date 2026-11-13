@@ -95,4 +95,34 @@ class EventContractsTest {
         assertThat(back.color()).isEqualTo(TrafficLight.VERDE);
         assertThat(back.score()).isEqualTo(90);
     }
+
+    @Test
+    void sbsDataV10JsonStillReadable() throws Exception {
+        String v10 = """
+                {"rating":"NORMAL","cppDays":0,"totalDebt":1200.00,"overdueDebt":0,"entitiesCount":2,"reportDate":"2026-10-01"}""";
+        SbsData back = mapper.readValue(v10, SbsData.class);
+        assertThat(back.rating()).isEqualTo(SbsRating.NORMAL);
+        assertThat(back.history()).isNull();
+        assertThat(back.hasHistory()).isTrue();
+    }
+
+    @Test
+    void sbsDataV11RoundTripWithDetail() throws Exception {
+        var data = new SbsData(SbsRating.PERDIDA, 0, BigDecimal.ZERO, new BigDecimal("188.85"), 1, LocalDate.of(2026, 4, 28),
+                new BigDecimal("188.85"), BigDecimal.ZERO, BigDecimal.ZERO, SbsRating.PERDIDA, 7, 9, LocalDate.of(2023, 12, 28),
+                List.of(new SbsData.Entity("BANCO X", SbsRating.PERDIDA, 0, BigDecimal.ZERO, BigDecimal.ZERO, new BigDecimal("188.85"),
+                        List.of("CREDITOS CASTIGADOS"), "2023-12", "2026-04", true)),
+                List.of(new SbsData.Month("2026-04", SbsRating.PERDIDA, BigDecimal.ZERO, BigDecimal.ZERO, new BigDecimal("188.85"), 1, 0)));
+        var back = mapper.readValue(mapper.writeValueAsString(data), SbsData.class);
+        assertThat(back).isEqualTo(data);
+    }
+
+    @Test
+    void providerResultModeIsOptional() throws Exception {
+        var legacy = mapper.readValue("{\"provider\":\"SBS\",\"status\":\"NO_DATA\",\"latencyMs\":5,\"fromCache\":false}", ProviderResult.class);
+        assertThat(legacy.mode()).isNull();
+        ProviderResult<SbsData> off = ProviderResult.notContracted(Provider.INFOCORP);
+        assertThat(off.isNotContracted()).isTrue();
+        assertThat(off.isOk()).isFalse();
+    }
 }

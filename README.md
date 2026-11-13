@@ -45,7 +45,7 @@ Los consumidores **deben ser idempotentes** (descartar `eventId` repetidos).
 <dependency>
   <groupId>app.pintabien</groupId>
   <artifactId>pintabien-common-lib</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
 </dependency>
 ```
 
@@ -63,5 +63,6 @@ Los consumidores **deben ser idempotentes** (descartar `eventId` repetidos).
 ## Versionado
 
 - `1.0.0` — versión inicial: 4 eventos, DTOs de proveedores, utilidades.
+- `1.1.0` — `SbsData` con detalle RCC (entidades, historial mensual, castigos, % Normal, peor calificación 12m); `ProviderResult.mode` (`real`/`mock`/`off`) y `notContracted()`; `EvaluationContext.declaredMonthlyIncome`. Todo aditivo: los constructores v1.0 se conservan.
 - Cambios **MINOR**: agregar campos opcionales / nuevos enums (los consumidores ignoran lo desconocido).
 - Cambios **MAJOR**: quitar/renombrar campos → en su lugar crear un evento nuevo.
