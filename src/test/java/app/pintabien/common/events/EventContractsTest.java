@@ -38,6 +38,37 @@ class EventContractsTest {
     }
 
     @Test
+    void v12ProductoMontoPlazoYGiroRoundTrip() throws Exception {
+        var ctx = new EvaluationContext(new BigDecimal("150.00"), true, false, false, null, new BigDecimal("8000.00"), 18,
+                app.pintabien.common.model.BusinessType.FINANCIERA);
+        var event = EvaluationRequestedEvent.create("corr-12", tenant, candidate, DocumentType.DNI, "44123451",
+                Purpose.PRESTAMO_PERSONAL, UUID.randomUUID(), ctx);
+
+        var back = mapper.readValue(mapper.writeValueAsString(event), EvaluationRequestedEvent.class);
+
+        assertThat(back).isEqualTo(event);
+        assertThat(back.context().termMonths()).isEqualTo(18);
+        assertThat(Purpose.COMPRA.normalized()).isEqualTo(Purpose.HIPOTECARIO);
+        assertThat(Purpose.ALQUILER.isLoan()).isFalse();
+    }
+
+    @Test
+    void v11SinCamposNuevosYProductoDesconocidoSeLeenSinRomper() throws Exception {
+        String v11 = """
+                {"eventId":"%s","eventType":"evaluation.requested","eventVersion":1,"correlationId":"c","tenantId":"%s",
+                 "candidateId":"%s","occurredAt":"2026-11-01T10:00:00Z","documentType":"DNI","documentNumber":"44123451",
+                 "purpose":"LEASING_FUTURO","context":{"utilityDebtToleranceAmount":150,"utilityDebtToleranceEnabled":true,
+                 "declarationSubmitted":false,"declarationValidated":false}}
+                """.formatted(UUID.randomUUID(), tenant, candidate);
+
+        var back = mapper.readValue(v11, EvaluationRequestedEvent.class);
+
+        assertThat(back.purpose()).isEqualTo(Purpose.OTRO);
+        assertThat(back.context().requestedAmount()).isNull();
+        assertThat(back.context().businessType()).isNull();
+    }
+
+    @Test
     void sourcesCollectedRoundTripWithTypedProviderResults() throws Exception {
         var sbs = ProviderResult.ok(Provider.SBS,
                 new SbsData(SbsRating.NORMAL, 0, new BigDecimal("1200.50"), BigDecimal.ZERO, 2, LocalDate.of(2026, 10, 1)), 120, false);
