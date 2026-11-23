@@ -12,7 +12,7 @@ Se publica como artefacto Maven (`app.pintabien:pintabien-common-lib`) con **Sem
 | Paquete | Qué hay |
 |---|---|
 | `app.pintabien.common.events` | `DomainEvent` y los 4 eventos: `EvaluationRequestedEvent`, `SourcesCollectedEvent`, `EvaluationCompletedEvent`, `DeclarationSubmittedEvent`; DTOs de proveedores (`ReniecData`, `SbsData`, `InfocorpData`, `AssetsData`), `ProviderResult<T>`, `FiredRule`, `EvaluationContext`, `EventJson` |
-| `app.pintabien.common.model` | Enums: `TrafficLight`, `EvaluationResultStatus`, `DocumentType`, `Purpose`, `Provider`, `SourceStatus`, `SbsRating`, `DeclarationStatus`, `CandidateEvaluationStatus`; códigos de `Warnings` |
+| `app.pintabien.common.model` | Enums: `TrafficLight`, `EvaluationResultStatus`, `DocumentType`, `Purpose` (producto de crédito), `BusinessType` (giro), `Provider`, `SourceStatus`, `SbsRating`, `DeclarationStatus`, `CandidateEvaluationStatus`; códigos de `Warnings` |
 | `app.pintabien.common.messaging` | `PintabienAmqp`: exchange `pintabien.events`, DLX, routing keys y convención de nombres de colas |
 | `app.pintabien.common.util` | `DocumentMasker` (`44****45`), `DocumentHasher` (SHA-256 para claves de caché), `CorrelationIds`, `TenantContext`, `Headers` |
 
@@ -23,7 +23,7 @@ Los consumidores **deben ser idempotentes** (descartar `eventId` repetidos).
 
 | Routing key | Productor → Consumidor | Payload |
 |---|---|---|
-| `evaluation.requested` | core → integrations | documento en claro (solo dentro del broker), propósito, `EvaluationContext` (tolerancias del tenant y estado de la declaración) |
+| `evaluation.requested` | core → integrations | documento en claro (solo dentro del broker), producto solicitado (`purpose`), `EvaluationContext` (tolerancias del tenant, estado de la declaración, monto, plazo y giro) |
 | `sources.collected` | integrations → scoring | `ProviderResult` por fuente (RENIEC, SBS, INFOCORP, ASSETS) con `status` OK/ERROR/NO_DATA y datos normalizados; documento **enmascarado** |
 | `evaluation.completed` | scoring → core | `evaluationId`, `color`, `score`, `status` COMPLETA/INCOMPLETA, versión de reglas, `firedRules`, `warnings` |
 | `declaration.submitted` | core → scoring | declaración informativa enviada/validada; scoring re-evalúa con el último snapshot |
@@ -45,7 +45,7 @@ Los consumidores **deben ser idempotentes** (descartar `eventId` repetidos).
 <dependency>
   <groupId>app.pintabien</groupId>
   <artifactId>pintabien-common-lib</artifactId>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
 </dependency>
 ```
 
@@ -64,5 +64,6 @@ Los consumidores **deben ser idempotentes** (descartar `eventId` repetidos).
 
 - `1.0.0` — versión inicial: 4 eventos, DTOs de proveedores, utilidades.
 - `1.1.0` — `SbsData` con detalle RCC (entidades, historial mensual, castigos, % Normal, peor calificación 12m); `ProviderResult.mode` (`real`/`mock`/`off`) y `notContracted()`; `EvaluationContext.declaredMonthlyIncome`. Todo aditivo: los constructores v1.0 se conservan.
+- `1.2.0` — Pintabien evalúa crédito en general: `Purpose` suma productos (`PRESTAMO_PERSONAL`, `CONSUMO`, `VEHICULAR`, `HIPOTECARIO`, `TARJETA`, `NEGOCIO`, `OTRO`; `COMPRA` = hipotecario), enum `BusinessType` (giro del tenant) y `EvaluationContext.requestedAmount`, `termMonths`, `businessType`. `EventJson` lee enums desconocidos como su valor por defecto (`OTRO`): los consumidores deben activar `READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE`. Todo aditivo.
 - Cambios **MINOR**: agregar campos opcionales / nuevos enums (los consumidores ignoran lo desconocido).
 - Cambios **MAJOR**: quitar/renombrar campos → en su lugar crear un evento nuevo.
